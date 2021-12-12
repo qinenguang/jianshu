@@ -12,28 +12,32 @@ import * as actionCreator from "./store/actionCreator"
 class Header extends Component {
     getListArea() {
         const { focused, list, page, mouseIn,
-             handleMouseEnter, handleMouseLeave, totalpage, handleChangePage} =this.props;
+            handleMouseEnter, handleMouseLeave, totalpage, handleChangePage } = this.props;
         const jsList = list.toJS()
         const pageList = []
         if (jsList.length) {
-            for (let i = (page*10); i < (page + 1)*10; i++) {
-            pageList.push(
-                <SearchInfoItem key={jsList[i]}>{jsList[i]}</SearchInfoItem>    
-            )
+            for (let i = (page * 10); i < (page + 1) * 10; i++) {
+                pageList.push(
+                    <SearchInfoItem key={jsList[i]}>{jsList[i]}</SearchInfoItem>
+                )
+            }
         }
-        }   
         if (focused || mouseIn) {
             return (
-                <SearchInfo 
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                <SearchInfo
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
                 >
                     <SearchInfoTitle>
                         热门搜索
-                        <SearchInfoSwitch onClick={() => handleChangePage(page, totalpage)}>换一批</SearchInfoSwitch>
+                        <SearchInfoSwitch
+                            onClick={() => handleChangePage(page, totalpage, this.spinIcon)}>
+                            <span ref={(icon) => { this.spinIcon = icon }} className="iconfont spin">&#xe851;</span>
+                            换一批
+                        </SearchInfoSwitch>
                     </SearchInfoTitle>
                     <SearchInfoList>
-                        {pageList }
+                        {pageList}
                     </SearchInfoList>
                 </SearchInfo>
             )
@@ -42,7 +46,7 @@ class Header extends Component {
         }
     }
     render() {
-        const { focused, handleInputFocus, handleInputBlur} = this.props
+        const { focused, handleInputFocus, handleInputBlur, list } = this.props
         return (
             <HeadWrapper>
                 <Logo />
@@ -61,20 +65,20 @@ class Header extends Component {
                         >
                             <Navsearch
                                 className={focused ? 'focused' : ''}
-                                onFocus={handleInputFocus}
+                                onFocus={() => handleInputFocus(list)}
                                 onBlur={handleInputBlur}
                             >
                             </Navsearch>
                         </CSSTransition>
                         <span
-                            className={focused ? 'focused iconfont' : 'iconfont'}
-                        >&#xe614;</span>
+                            className={focused ? 'focused iconfont zoom' : 'iconfont zomm'}
+                        >&#xe60c;</span>
                         {this.getListArea(focused)}
                     </SearchWrapper>
                 </Nav>
                 <Addition>
                     <Button className='write'>
-                        <span className="iconfont">&#xe615;</span>
+                        <span className="iconfont">&#xe617;</span>
                         写文章
                     </Button>
                     <Button className="reg">注册</Button>
@@ -97,23 +101,32 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        handleInputFocus() {
-            dispatch(actionCreator.getList())
+        handleInputFocus(list) {
+            if (list.size === 0) {
+                dispatch(actionCreator.getList())
+            }
             dispatch(actionCreator.Focus())
         },
         handleInputBlur() {
             dispatch(actionCreator.Blur())
         },
-        handleMouseEnter () {
+        handleMouseEnter() {
             dispatch(actionCreator.mouseEnter())
         },
-        handleMouseLeave () {
+        handleMouseLeave() {
             dispatch(actionCreator.mouseLeave())
         },
-        handleChangePage (page,totalpage) {
-            if (page < totalpage-1) {
+        handleChangePage(page, totalpage, spin) {
+            let originAngle = spin.style.transform.replace(/[^0-9]/ig, "")
+            if (originAngle) {
+                originAngle = parseInt(originAngle, 10)
+            } else {
+                originAngle = 0
+            }
+            spin.style.transform = "rotate(" + (originAngle + 360) + "deg)"
+            if (page < totalpage - 1) {
                 dispatch(actionCreator.changePage(page + 1))
-            }else{
+            } else {
                 dispatch(actionCreator.changePage(0))
             }
         }
