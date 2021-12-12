@@ -72,13 +72,13 @@ class Header extends Component {
                         </CSSTransition>
                         <span
                             className={focused ? 'focused iconfont zoom' : 'iconfont zomm'}
-                        >&#xe60c;</span>
+                        >&#xe614;</span>
                         {this.getListArea(focused)}
                     </SearchWrapper>
                 </Nav>
                 <Addition>
                     <Button className='write'>
-                        <span className="iconfont">&#xe617;</span>
+                        <span className="iconfont">&#xe678;</span>
                         写文章
                     </Button>
                     <Button className="reg">注册</Button>
