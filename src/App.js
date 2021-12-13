@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter, Route , Routes} from "react-router-dom";
 import Header from './common/header';
 import Home from './pages/home';
 import Detail from './pages/detail';
@@ -13,10 +13,10 @@ class App extends Component {
         <div>
           <Header />
           <BrowserRouter>
-              <div>
-                <Route path="/" exact component={Home}></Route>
-                <Route path="/detail" exact component={Detail}></Route>
-              </div>
+              <Routes>
+                <Route path="/" exact element={<Home/>}></Route>
+                <Route path="/detail" exact element={<Detail/>}></Route>
+              </Routes>
           </BrowserRouter>
         </div>
 
