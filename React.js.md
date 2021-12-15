@@ -5641,15 +5641,376 @@ export default (state = defaultState, action) => {
 
 #### 8.8 实现加载更多功能
 
+实现文章列表下的更多文章功能
 
+首先在public/api下创建homeList.json
+
+```react
+{
+    "success": true,    
+    "data": [ {
+            "id": 4,
+            "title": "《白鹿原》：一本有点颜色的书？",
+            "desc": "初二时，在图书馆借了《白鹿原》，我后桌一名男生看到后，怪笑一声，然后用一种神秘的口吻对我说：“哇，你也看这书啊！我看了不到四章，我爸就不让我看了...",
+            "imgurl": "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg"
+        },{
+            "id": 5,
+            "title": "《白鹿原》：一本有点颜色的书？",
+            "desc": "初二时，在图书馆借了《白鹿原》，我后桌一名男生看到后，怪笑一声，然后用一种神秘的口吻对我说：“哇，你也看这书啊！我看了不到四章，我爸就不让我看了...",
+            "imgurl": "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg"
+        },{
+            "id": 6,
+            "title": "《白鹿原》：一本有点颜色的书？",
+            "desc": "初二时，在图书馆借了《白鹿原》，我后桌一名男生看到后，怪笑一声，然后用一种神秘的口吻对我说：“哇，你也看这书啊！我看了不到四章，我爸就不让我看了...",
+            "imgurl": "https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg"
+        }
+    ]
+}
+```
+
+**List.js**
+
+```react
+import React, { Component } from "react";
+import { ListItem, ListInfo, LoadMore } from "../style"
+import { connect } from "react-redux";
+import {actionCreator} from "../store"
+
+class List extends Component {
+    render() { 
+        // page 同props进行解构赋值
+        // 更改key值 改为index(不提倡)
+        const { list, getMoreList, page } = this.props;
+        return (
+            <div>
+                {
+                    list.map((item, index) => {
+                        return (
+                            <ListItem key={index}>
+                                <img className="pic" src={item.get('imgurl')} alt="" />
+                                <ListInfo>
+                                    <h3 className="title">{item.get("title")}</h3>
+                                    <p className="desc">{item.get("desc")}</p>
+                                </ListInfo>
+                            </ListItem>
+                        )
+                    })
+                }
+                // 点击时调用getMoreList方法 传递page参数
+                <LoadMore onClick={() => getMoreList(page)}>更多文字</LoadMore>
+            </div>
+        )
+    }
+}
+
+const mapState = (state) => ({
+    list: state.getIn(['home', "articleList"]),
+    page: state.getIn(['home', "articlePage"])
+})
+
+// 新建映射
+const mapDispatch= (dispatch) => ({
+    getMoreList(page) {
+        dispatch(actionCreator.getMoreList(page))
+    }
+})
+export default connect(mapState, mapDispatch)(List)
+```
+
+**store/actionCreator.js**
+
+```react
+import axios from "axios";
+import * as actionTypes from "./actionTypes"
+import { fromJS } from "immutable";
+
+const changeHomeData = (result) => ({
+    type: actionTypes.CHANGE_HOME_DATA,
+    topicList: result.topicList,
+    articleList: result.articleList,
+    recommendList: result.recommendList,
+    writerList: result.writerList
+})
+export const getHomeInfo = () => {
+    return (dispatch) => {
+        axios.get('/api/home.json').then((res) => {
+            const result = res.data.data;
+            dispatch(changeHomeData(result))
+        })
+    }
+};
+
+const addHomeList = (list, nextPage) => ({
+    type: actionTypes.ADD_LIST,
+    list: fromJS(list),
+    nextPage
+})
+
+// 使得page在每次点击时加1，并发送给reducer
+export const getMoreList = (page) => {
+    return (dispatch) => {
+        axios.get('/api/homeList.json?page=' + page).then((res) => {
+            const result = res.data.data;
+            dispatch(addHomeList(result, page + 1))
+        })
+    }
+}
+```
+
+**store/actionTypes.js**
+
+```react
+export const CHANGE_HOME_DATA = "HOME/CHANGE_HOME_DATA";
+export const ADD_LIST = "HOME/ADD_LIST";
+```
+
+**store/reducer.js**
+
+```react
+import { fromJS } from "immutable";
+import * as actionTypes from "./actionTypes";
+
+const defaultState = fromJS({
+    topicList: [],
+    articleList: [],
+    recommendList: [],
+    writerList: [],
+    articlePage: 1
+});
+// eslint-disable-next-line
+export default (state = defaultState, action) => {
+    switch (action.type) {
+        case actionTypes.CHANGE_HOME_DATA:
+            return state.merge({
+                topicList: fromJS(action.topicList),
+                recommendList: fromJS(action.recommendList),
+                articleList: fromJS(action.articleList),
+                writerList: fromJS(action.writerList)
+            })
+        // concat在列表后增添数据
+        case actionTypes.ADD_LIST:
+            return state.merge({
+                'articleList': state.get('articleList').concat(action.list),
+                'articlePage': action.nextPage
+            })
+        default:
+            return state;
+    }
+}
+```
 
 #### 8.9 返回顶部功能实现
 
+返回顶部功能组件内容较少，适合放在home下的index.js下编写
 
+让document.documentElement.scrollTop在大于150时 按钮出现，否则消失，添加onclick时件
+
+**index.js**
+
+```react
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import Topic from "./components/Topic";
+import List from "./components/List";
+import Recommend from "./components/Recommend";
+import Writer from "./components/Writer";
+import { HomeWrapper, HomeLeft, HomeRight } from "./style"
+import { actionCreator } from "./store";
+import { BackTop } from "./style"
+
+class Home extends Component {
+	
+    // 回到顶部的点击事件
+    handleScrollTop() {
+        window.scrollTo(0, 0);
+    }
+    render() {
+        return (
+            <HomeWrapper>
+                <HomeLeft>
+                    <img alt="" className="banner-img" src="//upload.jianshu.io/admin_banners/web_images/4318/60781ff21df1d1b03f5f8459e4a1983c009175a5.jpg?imageMogr2/auto-orient/strip|imageView2/1/w/1250/h/540" />
+                    <Topic />
+                    <List />
+                </HomeLeft>
+                <HomeRight>
+                    <Recommend />
+                    <Writer />
+                </HomeRight>
+                {this.props.showScroll ? <BackTop onClick={this.handleScrollTop}>顶部</BackTop> : null}
+
+            </HomeWrapper>
+        )
+    }
+    // 刚渲染时 bindEvents-->changeScrollTopShow-->actionCreator.toggleTopShow
+    componentDidMount() {
+        this.bindEvents()
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.props.changeScrollTopShow)
+    }
+    bindEvents() {
+        window.addEventListener('scroll', this.props.changeScrollTopShow)
+    }
+    
+}
+
+// 调用reducer的初始值
+const mapState = (state) => ({
+    showScroll: state.getIn(['home', 'showScroll'])
+})
+
+const mapDispatch = (dispatch) => ({
+    changeScrollTopShow() {
+        if (document.documentElement.scrollTop > 150) {
+            dispatch(actionCreator.toggleTopShow(true))
+        }else{
+            dispatch(actionCreator.toggleTopShow(false))
+        }
+    }
+})
+
+export default connect(mapState, mapDispatch)(Home)
+```
+
+**style.js**
+
+```react
+import styled from "styled-components";
+export const BackTop = styled.div`
+    position: fixed;
+    right:100px;
+    bottom:100px;
+    width: 60px;
+    height:60px;
+    line-height: 60px;
+    text-align: center;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    cursor: pointer;
+`
+```
+
+**store/actionCreator.js**
+
+```react
+import axios from "axios";
+import * as actionTypes from "./actionTypes"
+import { fromJS } from "immutable";
+
+export const toggleTopShow = (show) => ({
+    type:actionTypes.TOGGLE_SCROLL,
+    show
+})
+```
+
+**store/actionTypes.js**
+
+```react
+export const TOGGLE_SCROLL = "HOME/TOGGLE_SCROLL";
+```
+
+**store/reducer.js**
+
+```react
+import { fromJS } from "immutable";
+import * as actionTypes from "./actionTypes"
+const defaultState = fromJS({
+    topicList: [],
+    articleList: [],
+    recommendList: [],
+    writerList: [],
+    articlePage: 1,
+    showScroll: false
+});
+
+// 打包action的数据修改
+const changeHomeData = (state, action) => {
+    return state.merge({
+        topicList: fromJS(action.topicList),
+        recommendList: fromJS(action.recommendList),
+        articleList: fromJS(action.articleList),
+        writerList: fromJS(action.writerList)
+    })
+}
+
+// eslint-disable-next-line
+export default (state = defaultState, action) => {
+    switch (action.type) {
+        case actionTypes.CHANGE_HOME_DATA:
+            return changeHomeData(state, action)
+        case actionTypes.ADD_LIST:
+            return state.merge({
+                'articleList': state.get('articleList').concat(action.list),
+                'articlePage': action.nextPage
+            })
+            // 根据判断的true or false 来给定showScroll的值
+        case actionTypes.TOGGLE_SCROLL:
+            return state.set('showScroll', action.show)
+        default:
+            return state;
+    }
+}
+```
 
 #### 8.10 首页性能优化及路由跳转
 
+原代码中通过connect连接形成容器组件，意味着只有store里的数据发生变化，各个组件将会被重新渲染，导致性能不高
 
+调用`import React, { PureComponent } from "react";`意味会在该组件内默认执行shouldComponentUpdate函数
+
+建议PureComponent和immutable对象一起使用，否则容易出现问题。
+
+为了实现页面跳转 如果使用a标签 则点击文章详情列表就会重新加载一下html 消耗性能
+
+```react
+<a key={index} href='./detail'>
+	<ListItem> </ListItem>
+ </a>
+```
+
+运用react-router-dom的Link组件
+
+List.js的文章跳转，可使用Link
+
+```react
+import {Link} from "react-router-dom";
+
+<Link key={index} to='./detail'>
+	<ListItem> </ListItem>
+<Link>
+```
+
+同时jianshu项目首页有logo点击的跳转功能
+
+在style.js中将a标签修改为div标签
+
+在header下的index.js中 用Link将Logo标签包围
+
+```react
+import {Link} from "react-router-dom";
+				<Link to="/">
+                    <Logo />
+                </Link>
+```
+
+react-router-dom版本6.0之后  **App.js**如下代码不会报与5.2.0版本一样的错误(此错误提示不能将Link放在router外)
+
+```react
+	return (
+      <Provider store={store}>
+        <div>
+          <BrowserRouter>
+            <Header />
+              <Routes>
+                <Route path="/" exact element={<Home/>}></Route>
+                <Route path="/detail" exact element={<Detail/>}></Route>
+              </Routes>
+          </BrowserRouter>
+          </div>
+      </Provider>
+    );
+```
 
 ### 九、项目实战 详情页面和登录功能开发
 

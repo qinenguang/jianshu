@@ -146,7 +146,7 @@ export const AllWriter = styled.div`
     position: absolute;
     width: 258px;
     padding: 7px 7px 7px 12px;
-    left: 0;
+    right: 240px;
     font-size: 13px;
     color: #787878;
     background-color: #f7f7f7;
@@ -154,3 +154,28 @@ export const AllWriter = styled.div`
     border-radius: 4px;
     text-align: center;    
 `;
+
+export const LoadMore = styled.div`
+    width: 100%;
+    heighjt: 40px;
+    line-height: 40px;
+    margin: 30px 0;
+    background: #a5a5a5;
+    text-align: center;
+    border-radius: 20px;
+    color: #fff;
+    cursor: pointer;
+`;
+
+export const BackTop = styled.div`
+    position: fixed;
+    right:100px;
+    bottom:100px;
+    width: 60px;
+    height:60px;
+    line-height: 60px;
+    text-align: center;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    cursor: pointer;
+`

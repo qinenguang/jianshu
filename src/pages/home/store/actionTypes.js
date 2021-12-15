@@ -1,1 +1,3 @@
 export const CHANGE_HOME_DATA = "HOME/CHANGE_HOME_DATA";
+export const ADD_LIST = "HOME/ADD_LIST";
+export const TOGGLE_SCROLL = "HOME/TOGGLE_SCROLL";
