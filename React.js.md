@@ -5224,30 +5224,43 @@ const mapState = (state) => ({
 export default connect(mapState,null)(Recommend)
 
 // Writer.js
-import React, {Component} from "react";
-import {WriterWrapper, } from "../style";
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { WriterHeader, WriterSwitch, WriterItem, WriterInfo, WriterName, WriterDesc, WriterFocus, AllWriter } from "../style";
 class Writer extends Component {
     render() {
+        const { list } = this.props;
         return (
             <div>
                 <WriterHeader>推荐作者
                     <WriterSwitch>换一批</WriterSwitch>
                 </WriterHeader>
-                <WriterItem key={item.get('id')}>
-					<img className="head" src=" " alt="" />
-					<WriterInfo>
-                        <WriterName>梅拾璎</WriterName>
-                        <WriterDesc>写了17.7k字 · 22k喜欢</WriterDesc>
-                        <WriterFocus>+关注</WriterFocus>
-                    </WriterInfo>
-                </WriterItem>        
-                <AllWriter>查看全部</AllWriter>
+                {
+                    list.map((item) => {
+                        return (
+                            <WriterItem key={item.get('id')}>
+                                <img className="head" src={item.get("imgUrl")}
+                                    alt="" />
+                                <WriterInfo>
+                                    <WriterName>{item.get('name')}</WriterName>
+                                    <WriterDesc>{item.get('desc')}</WriterDesc>
+                                    <WriterFocus>+关注</WriterFocus>
+                                </WriterInfo>
+                            </WriterItem>
+                            
+                    )
+                })}        
+                    <AllWriter>查看全部</AllWriter>
             </div>
         )
     }
 }
 
-export default Writer
+const mapState = (state) => ({
+    list: state.getIn(['home', 'writerList'])
+})
+
+export default connect(mapState, null)(Writer)
 ```
 
 style.js样式部分
@@ -5407,15 +5420,18 @@ export default (state = defaultState, action) => {
         "writerList":[{
             "id":1,
             "imgUrl":"https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg",
-            "desc":"写了151.5k字 · 13k喜欢"
+            "desc":"写了151.5k字 · 13k喜欢",
+            "name":"🐖"
         },{
             "id":2,
             "imgUrl":"https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg",
-            "desc":"写了17.7k字 · 22k喜欢"
+            "desc":"写了17.7k字 · 22k喜欢",
+            "name":"兰"
         },{
             "id":3,
             "imgUrl":"https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg",
-            "desc":"写了200.3k字 · 777k喜欢"        
+            "desc":"写了200.3k字 · 777k喜欢" ,
+            "name":"梅"
         }]
     }
 }

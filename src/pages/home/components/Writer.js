@@ -16,7 +16,7 @@ class Writer extends Component {
                                 <img className="head" src={item.get("imgUrl")}
                                     alt="" />
                                 <WriterInfo>
-                                    <WriterName>梅拾璎</WriterName>
+                                    <WriterName>{item.get('name')}</WriterName>
                                     <WriterDesc>{item.get('desc')}</WriterDesc>
                                     <WriterFocus>+关注</WriterFocus>
                                 </WriterInfo>
@@ -25,10 +25,7 @@ class Writer extends Component {
                     )
                 })}        
                     <AllWriter>查看全部</AllWriter>
-                
-
             </div>
-
         )
     }
 }
