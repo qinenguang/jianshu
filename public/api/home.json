@@ -32,6 +32,19 @@
         },{
             "id":2,
             "imgurl":"https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg"    
+        }],
+        "writerList":[{
+            "id":1,
+            "imgUrl":"https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg",
+            "desc":"写了151.5k字 · 13k喜欢"
+        },{
+            "id":2,
+            "imgUrl":"https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg",
+            "desc":"写了17.7k字 · 22k喜欢"
+        },{
+            "id":3,
+            "imgUrl":"https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg",
+            "desc":"写了200.3k字 · 777k喜欢"        
         }]
     }
 }

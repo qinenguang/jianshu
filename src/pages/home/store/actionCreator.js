@@ -4,7 +4,8 @@ const changeHomeData = (result) => ({
     type: actionTypes.CHANGE_HOME_DATA,
     topicList: result.topicList,
     articleList: result.articleList,
-    recommendList: result.recommendList
+    recommendList: result.recommendList,
+    writerList: result.writerList
 })
 export const getHomeInfo = () => {
     return (dispatch) => {

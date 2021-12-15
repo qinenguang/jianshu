@@ -3,7 +3,8 @@ import * as actionTypes from "./actionTypes"
 const defaultState = fromJS({
     topicList: [],
     articleList: [],
-    recommendList:[]    
+    recommendList:[],
+    writerList:[]    
 });
 // eslint-disable-next-line
 export default (state = defaultState, action) => {
@@ -12,7 +13,8 @@ export default (state = defaultState, action) => {
             return state.merge({
                 topicList: fromJS(action.topicList),
                 recommendList: fromJS(action.recommendList),
-                articleList: fromJS(action.articleList)
+                articleList: fromJS(action.articleList),
+                writerList: fromJS(action.writerList)
             })
             //state.set('topicList', fromJS(action.topicList)).set
             //console.log(action)
