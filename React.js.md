@@ -6016,11 +6016,148 @@ react-router-dom版本6.0之后  **App.js**如下代码不会报与5.2.0版本�
 
 #### 9.1 详情页面布局
 
+完成详情页的布局
 
+**pages/detail/index.js**
+
+```react
+import React, {Component} from "react";
+import {DetailWrapper, Header, Content} from "./style";
+
+class Detail extends Component {
+    render() {
+        return (
+            <DetailWrapper>
+                <Header>衡水中学</Header>
+                <Content>
+                    <img alt="" src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg" />
+                    <p><b>清华</b></p>
+                    <p>清华</p>
+                    <p>清华</p>
+                    <p>清华</p>
+                </Content>
+            </DetailWrapper>
+        )
+    }
+}
+
+export default Detail
+```
+
+**pages/detail/style.js**
+
+```react
+import styled from "styled-components";
+
+export const DetailWrapper = styled.div`
+    overflow: hidden;
+    width: 620px;
+    margin: 0 auto;
+    padding-bottom: 100px;
+`;
+
+export const Header = styled.div`
+    margin: 50px 0 20px 0;
+    font-size: 34px;
+    line-height: 44px;
+    color: #333;
+    font-weight: bold;
+`;
+
+export const Content = styled.div`
+    color: #2f2f2f;
+    img{
+        width: 100%;
+    }
+    p{
+        margin: 25px 0;
+        font-size: 16px;
+        line-height: 30px;
+    }
+    b{
+        font-weight: bold;
+    }
+`;
+```
+
+预览效果图
+
+<img src="D:/react/37.jpg" style="zoom: 33%;" />
 
 #### 9.2 redux管理详情页面数据
 
+通过detail下store来管理详情页面的数据 在store下创建index.js  reducer.js  actionCreator.js 以及actionTypes.js
 
+**detail/store/index.js**
+
+```react
+import reducer from "./reducer";
+import * as actionCreator from "./actionCreator";
+export { reducer, actionCreator };
+```
+
+**detail/store/reducer.js**
+
+```react
+import { fromJS } from "immutable";
+//import * as actionTypes from "./actionTypes"
+const defaultState = fromJS({
+    title: "衡水中学",
+    content:'<img alt="" src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg" /><p><b>清华</b></p><p>清华</p><p>清华</p><p>清华</p>'
+});
+// eslint-disable-next-line
+export default (state = defaultState, action) => {
+    switch (action.type) {
+        default:
+            return state;
+    }
+}
+```
+
+为了将该页面的reducer同总store下的总reducer建立起联系
+
+在**src/store/reducer.js**添加代码
+
+```react
+import { combineReducers } from "redux-immutable"
+import {reducer as headerReducer} from "../common/header/store"
+import  {reducer as homeReducer} from "../pages/home/store"
+import  {reducer as detailReducer} from "../pages/detail/store"
+
+const reducer = combineReducers({
+    header: headerReducer,
+    home: homeReducer,
+    detail: detailReducer
+})
+
+export default reducer
+```
+
+**detail/index.js**
+
+```react
+import React, {Component} from "react";
+import {DetailWrapper, Header, Content} from "./style";
+import {connect} from "react-redux";
+
+class Detail extends Component {
+    render() {
+        return (
+            <DetailWrapper>
+                <Header>{this.props.title}</Header>
+                <Content dangerouslySetInnerHTML={{__html: this.props.content}} />
+            </DetailWrapper>
+        )
+    }
+}
+const mapState = (state) => ({
+    title: state.getIn(["detail", "title"]),
+    content: state.getIn(["detail", "content"])
+})
+export default connect(mapState,null)(Detail)
+```
+
+通过dangerouslySetInnerHTML方法的转义使得content中的内容实现html语法
 
 #### 9.3 异步获取数据
 
