@@ -6161,11 +6161,105 @@ export default connect(mapState,null)(Detail)
 
 #### 9.3 异步获取数据
 
+**public/api/detail.json**
 
+```json
+{
+    "success":true,
+    "data":{
+        "title": "衡水中学",
+        "content":"<img src='https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=1074417518,1198280004&fm=26&gp=0.jpg' /><p><b>清华</b></p><p>清华</p><p>清华</p><p>清华</p>"   
+    }
+}
+```
+
+**detail/index.js**派发action
+
+```react
+import React, {Component} from "react";
+import {DetailWrapper, Header, Content} from "./style";
+import {connect} from "react-redux";
+import { actionCreator} from "./store"
+
+class Detail extends Component {
+    render() {
+        return (
+            <DetailWrapper>
+                <Header>{this.props.title}</Header>
+                <Content dangerouslySetInnerHTML={{__html: this.props.content}} />
+            </DetailWrapper>
+        )
+    }
+    componentDidMount() {
+        this.props.getDetail()
+    }
+}
+const mapState = (state) => ({
+    title: state.getIn(["detail", "title"]),
+    content: state.getIn(["detail", "content"])
+})
+
+const mapDispatch = (dispatch) => ({
+    getDetail () {
+        dispatch(actionCreator.getDetail())
+    }
+})
+export default connect(mapState,mapDispatch)(Detail)
+```
+
+**detail/store/actionCreator.js**
+
+```react
+import axios from "axios"
+import * as actionTypes from "./actionTypes"
+
+const changeDetail = (content, title) => ({
+    type: actionTypes.CHANGE_DETAIL,
+    title,
+    content
+})
+export const getDetail = () => {
+    return (dispatch) => {
+        axios.get('/api/detail.json').then((res) => {
+            const result = res.data.data
+            dispatch(changeDetail(result.content, result.title))
+        })
+    }
+}
+```
+
+**detail/store/actionTypes.js**
+
+```react
+export const CHANGE_DETAIL = "DETAIL/CHANGE_DETAIL";
+```
+
+**detail/store/reducer.js**
+
+```react
+import { fromJS } from "immutable";
+import * as actionTypes from "./actionTypes"
+const defaultState = fromJS({
+    title: "",
+    content:""
+});
+// eslint-disable-next-line
+export default (state = defaultState, action) => {
+    switch (action.type) {
+        case actionTypes.CHANGE_DETAIL:
+            return state.merge({
+                title: action.title,
+                content: action.content
+            })
+        default:
+            return state;
+    }
+}
+```
 
 #### 9.4 页面路由参数的传递
 
-
+动态路由获取
 
 #### 9.5 登陆页面布局
 
