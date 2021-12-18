@@ -9,6 +9,7 @@ import {
 
 import {Link} from "react-router-dom"
 import * as actionCreator from "./store/actionCreator"
+import {actionCreator as LoginActionCreator} from "../../pages/login/store"
 
 class Header extends Component {
     getListArea() {
@@ -47,7 +48,7 @@ class Header extends Component {
         }
     }
     render() {
-        const { focused, handleInputFocus, handleInputBlur, list } = this.props
+        const { focused, handleInputFocus, handleInputBlur, list, login, logout } = this.props
         return (
             <HeadWrapper>
                 <Link to="/">
@@ -56,7 +57,10 @@ class Header extends Component {
                 <Nav>
                     <NavItem className='left active'>首页</NavItem>
                     <NavItem className='left'>下载App</NavItem>
-                    <NavItem className='right'>登陆</NavItem>
+                    {
+                        login ? <NavItem onClick={logout} className='right'>退出</NavItem> :
+                        <Link to="/login"> <NavItem className='right'>登陆</NavItem></Link>
+                    }
                     <NavItem className='right'>
                         <span className="iconfont">&#xe636;</span>
                     </NavItem>
@@ -80,10 +84,12 @@ class Header extends Component {
                     </SearchWrapper>
                 </Nav>
                 <Addition>
+                    <Link to="/write">
                     <Button className='write'>
                         <span className="iconfont">&#xe678;</span>
                         写文章
                     </Button>
+                    </Link>
                     <Button className="reg">注册</Button>
                 </Addition>
             </HeadWrapper>
@@ -99,6 +105,7 @@ const mapStateToProps = (state) => {
         page: state.getIn(['header', 'page']),
         totalpage: state.getIn(['header', 'totalpage']),
         mouseIn: state.getIn(['header', 'mouseIn']),
+        login: state.getIn(['login', 'login'])
     }
 }
 
@@ -132,6 +139,9 @@ const mapDispatchToProps = (dispatch) => {
             } else {
                 dispatch(actionCreator.changePage(0))
             }
+        },
+        logout(){
+            dispatch(LoginActionCreator.logout())
         }
     }
 }

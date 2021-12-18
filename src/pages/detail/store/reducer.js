@@ -4,6 +4,7 @@ const defaultState = fromJS({
     title: "",
     content:""
 });
+
 // eslint-disable-next-line
 export default (state = defaultState, action) => {
     switch (action.type) {

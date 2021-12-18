@@ -5999,15 +5999,13 @@ react-router-dom版本6.0之后  **App.js**如下代码不会报与5.2.0版本�
 ```react
 	return (
       <Provider store={store}>
-        <div>
-          <BrowserRouter>
+        <BrowserRouter>
+          <div>
             <Header />
-              <Routes>
-                <Route path="/" exact element={<Home/>}></Route>
-                <Route path="/detail" exact element={<Detail/>}></Route>
-              </Routes>
-          </BrowserRouter>
+            <Route path="/" exact component={Home}></Route>
+            <Route path="/detail" exact component={Detail}></Route>
           </div>
+        </BrowserRouter>
       </Provider>
     );
 ```
@@ -6261,21 +6259,426 @@ export default (state = defaultState, action) => {
 
 动态路由获取
 
+在List.js中  跳转指定id
+
+```react
+						<Link key={index} to={'./detail/' + item.get('id')}>
+                            <ListItem>
+                                <img className="pic" src={item.get('imgurl')} alt="" />
+                                <ListInfo>
+                                    <h3 className="title">{item.get("title")}</h3>
+                                    <p className="desc">{item.get("desc")}</p>
+                                </ListInfo>
+                            </ListItem>
+                            </Link>
+```
+
+App.js中 绑定指定id相应的路由
+
+```react
+            <Route path="/detail/:id" exact component={Detail}></Route>
+```
+
+在detail的store下获取id
+
+```react
+// detail/index.js
+	componentDidMount() {
+        this.props.getDetail(this.props.match.params.id)
+    }
+
+const mapDispatch = (dispatch) => ({
+    getDetail (id) {
+        dispatch(actionCreator.getDetail(id))
+    }
+});
+
+// store/actionCreator.js  获取到指定id的数据
+export const getDetail = (id) => {
+    return (dispatch) => {
+        axios.get('/api/detail.json?id='+id).then((res) => {
+            const result = res.data.data
+            dispatch(changeDetail(result.content, result.title))
+        }).catch(() => {
+            
+        })
+    }
+};
+```
+
+另一种方式
+
+在List.js中  跳转指定id
+
+```react
+						<Link key={index} to={'./detail?id=' + item.get('id')}>
+                            <ListItem>
+                                <img className="pic" src={item.get('imgurl')} alt="" />
+                                <ListInfo>
+                                    <h3 className="title">{item.get("title")}</h3>
+                                    <p className="desc">{item.get("desc")}</p>
+                                </ListInfo>
+                            </ListItem>
+                            </Link>
+```
+
+App.js中 绑定指定id相应的路由
+
+```react
+            <Route path="/detail" exact component={Detail}></Route>
+```
+
+在detail的store下获取id 
+
+需要自行处理？id= 的字符串
+
+```react
+// detail/index.js
+	componentDidMount() {
+        this.props.getDetail(this.props.location.search)
+    }
+
+```
+
 #### 9.5 登陆页面布局
 
+在pages下创建login文件夹 编写index.js和style.js
 
+**index.js**
+
+```react
+import React, {PureComponent} from "react";
+import {connect} from "react-redux";
+import {LoginWrapper, LoginBox, Input, Button} from "./style";
+
+class Login extends PureComponent {
+    render() {
+        return (
+            <LoginWrapper>
+                <LoginBox>
+                    <Input placeholder="账号" />
+                    <Input placeholder="密码" />
+                    <Button>登录</Button>
+                </LoginBox>
+                </LoginWrapper>
+        )
+    }
+}
+const mapState = (state) => ({
+
+})
+
+const mapDispatch = (dispatch) => ({
+    
+})
+export default connect(mapState,mapDispatch)(Login)
+```
+
+**style.js**
+
+```react
+import styled from "styled-components";
+
+export const LoginWrapper = styled.div`
+    z-index: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 56px;
+    background: #eee;
+`;
+
+export const LoginBox = styled.div`
+    width: 400px;
+    height: 180px;
+    margin: 100px auto;
+    padding-top: 20px;
+    background: #fff;
+    box-shadow: 0 0 8px;
+`;
+
+export const Input = styled.input`
+    display: block;
+    width: 200px;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 10px;
+    margin: 10px auto;
+    color: #777;
+`;
+
+export const Button = styled.div`
+    width: 220px;
+    height: 30px;
+    line-height: 30px;
+    color: #fff;
+    background: #3194d0;
+    border-radius: 15px;
+    margin: 10px auto;
+    text-align: center;
+`;
+```
+
+src/App.js添加`<Route path="/login" exact element={<Login/>}></Route>`
 
 #### 9.6 登陆功能实现
 
+通过login下store来管理详情页面的数据 在store下创建index.js  reducer.js  actionCreator.js 以及actionTypes.js
 
+首先创建login的reducer和总reducer的联系
+
+**src/store/reducer.js**
+
+```react
+import { combineReducers } from "redux-immutable"
+//import headerReducer from "../common/header/store/reducer"
+import {reducer as headerReducer} from "../common/header/store"
+import  {reducer as homeReducer} from "../pages/home/store"
+import  {reducer as detailReducer} from "../pages/detail/store"
+import  {reducer as loginReducer} from "../pages/login/store"
+
+const reducer = combineReducers({
+    header: headerReducer,
+    home: homeReducer,
+    detail: detailReducer,
+    login:loginReducer
+})
+
+export default reducer
+```
+
+header下index.js中通过login的true或者false来判断显示“登录”还是“退出”
+
+```react
+					<NavItem className='left active'>首页</NavItem>
+                    <NavItem className='left'>下载App</NavItem>
+                    {
+                        login ? <NavItem onClick={logout} className='right'>退出</NavItem> :
+                        <Link to="/login"> <NavItem className='right'>登录</NavItem></Link>
+                    }
+                    <NavItem className='right'>
+                        <span className="iconfont">&#xe636;</span>
+                    </NavItem>
+```
+
+**login/store/index.js**
+
+```react
+import reducer from "./reducer";
+import * as actionCreator from "./actionCreator";
+export { reducer, actionCreator };
+```
+
+**public/api/login.json**
+
+```json
+{
+    "success": true,
+    "data": true
+}
+```
+
+**login/index.js**派发action
+
+```react
+import React, {PureComponent} from "react";
+import {Navigate} from "react-router-dom";
+import {connect} from "react-redux";
+import {LoginWrapper, LoginBox, Input, Button} from "./style";
+import {actionCreator} from "./store"
+
+class Login extends PureComponent {
+    render() {
+        const {loginStatus} = this.props
+        if (!loginStatus){
+            return (
+            <LoginWrapper>
+                <LoginBox>
+                    <Input placeholder="账号" ref = {(input) => {this.account = input}}/>
+                    <Input placeholder="密码" type="password" ref = {(input) => {this.password = input}}/>
+                    <Button onClick={() => this.props.login(this.account, this.password)}>登录</Button>
+                </LoginBox>
+                </LoginWrapper>
+        )
+        }else {
+            return <Navigate to='/'/>  //重定位 返回首页
+        }
+        
+    }
+}
+const mapState = (state) => ({
+    loginStatus: state.getIn(['login', 'login'])
+})
+const mapDispatch = (dispatch) => ({
+    login(accountElem, passwordElem) {
+        dispatch(actionCreator.login(accountElem.value, passwordElem.value))
+    }
+})
+export default connect(mapState,mapDispatch)(Login)
+```
+
+在header下需要做如下编码
+
+```react
+// index.js
+import {actionCreator as LoginActionCreator} from "../../pages/login/store"
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+		logout(){
+            dispatch(LoginActionCreator.logout())
+        }
+    }
+}
+```
+
+**login/store/actionCreator.js**
+
+```react
+import axios from "axios"
+import * as actionTypes from "./actionTypes"
+const changeLogin = () => ({
+    type:actionTypes.CHANGE_LOGIN,
+    value:true
+})
+
+export const logout = () => ({
+    type:actionTypes.CHANGE_LOGOUT,
+    value:false
+})
+
+export const login = (account, password) => {
+    return (dispatch) => {
+        axios.get('/api/login.json?account=' + account + '&password' + password).then((res) => {
+            const result = res.data.data
+            if (result) {
+                dispatch(changeLogin())
+            }else{
+                alert('登录失败')
+            }
+        })
+    }
+}
+```
+
+**login/store/actionTypes.js**
+
+```react
+export const CHANGE_LOGIN = "LOGIN/CHANGE_LOGIN"
+export const CHANGE_LOGOUT= "LOGIN/CHANGE_LOGOUT"
+```
+
+**login/store/reducer.js**
+
+```react
+import { fromJS } from "immutable";
+import * as actionTypes from "./actionTypes"
+const defaultState = fromJS({
+    login: false
+});
+// eslint-disable-next-line
+export default (state = defaultState, action) => {
+    switch (action.type) {
+        case actionTypes.CHANGE_LOGIN:
+            return state.set('login', action.value)
+        case actionTypes.CHANGE_LOGOUT:
+            return state.set('login', action.value)
+        default:
+            return state;
+    }
+}
+```
 
 #### 9.7 登陆鉴权及代码优化
 
+为了使得只有在首页点击写文章时登录后才能进行编写，而未登录需进入登录界面
 
+在pages下创建write文件夹 并在此创建index.js
+
+```react
+import React, {PureComponent} from "react";
+import {Navigate} from "react-router-dom";
+import {connect} from "react-redux";
+
+class Write extends PureComponent {
+    render() {
+        const {loginStatus} = this.props
+        if (loginStatus){
+            return (
+            <div>写文章</div>
+        )
+        }else {
+            return <Navigate to='/login'/>
+        }
+        // 未登录返回登录界面
+    }
+}
+const mapState = (state) => ({
+    loginStatus: state.getIn(['login', 'login'])
+});
+
+export default connect(mapState,null)(Write);
+```
+
+在src/App.js中创建写文章的路由
+
+```react
+import Write from './pages/write'；
+
+                <Route path="/write" exact element={<Write/>}></Route>
+```
+
+在header组件的index.js中 通过Link包裹住写文章 完成页面跳转
+
+```
+				<Link to="/write">
+                    <Button className='write'>
+                        <span className="iconfont">&#xe678;</span>
+                        写文章
+                    </Button>
+                </Link>
+```
 
 #### 9.8 异步组件及withRouter路由方法的使用
 
+实现异步组件节约性能
 
+react-loadable 参考文档     https://github.com/jamiebuilds/react-loadable
+
+安装命令：`yarn add react-loadable`
+
+在detail文件夹下创建loadable.js文件 运用github仓库的示例
+
+```react
+import React from "react";
+import Loadable from 'react-loadable';
+
+const LoadableComponent = Loadable({
+  loader: () => import('./'),
+  loading(){
+      return <div>正在加载</div>
+  }
+});
+
+export default () => <LoadableComponent/>
+```
+
+在src/App.js中导入detail的模块会发生改变
+
+```react
+import Detail from './pages/detail/loadable';
+```
+
+此时详情对应的List.js的json数据id不易获取
+
+需要在detail/index.js中  运用withRouter方法 实现功能
+
+```react
+import {withRouter} from "react-router-dom";
+
+export default connect(mapState,mapDispatch)(withRouter(Detail))
+```
 
 ### 十、课程总结
 
@@ -6297,7 +6700,9 @@ npm i react-transition-group --save
 
 npm i react-router-dom@5.2.0 --save
 
+react-router-dom5.2.0中  import {Redirect} from "react-router-dom";
 
+react-router-dom6 是把`Switch`标签替换成了`Routes`标签，component替换成了`element`，然后偶然间发现`Redirect`也没法使用 需引入Navigate
 
 CSS语法
 
