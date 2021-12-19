@@ -6680,21 +6680,9 @@ import {withRouter} from "react-router-dom";
 export default connect(mapState,mapDispatch)(withRouter(Detail))
 ```
 
-### 十、课程总结
-
-#### 10.1 项目上线流程
-
-
-
-#### 10.2 React 版本升级说明
-
-
-
-#### 10.3 课程总结
-
-
-
 ### 其他
+
+课程上线
 
 npm i react-transition-group --save
 

@@ -7,5 +7,5 @@ const LoadableComponent = Loadable({
       return <div>正在加载</div>
   }
 });
-
+// eslint-disable-next-line
 export default () => <LoadableComponent/>
